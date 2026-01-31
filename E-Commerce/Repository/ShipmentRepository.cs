@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Commerce.Repository
 {
-    public class ShipmentRepository
+    public class ShipmentRepository:IShipmentRepository
     {
         E_Context context;
         public ShipmentRepository(E_Context _context)
@@ -30,6 +30,15 @@ namespace E_Commerce.Repository
         public void save()
         {
             context.SaveChanges();
+        }
+        public void Delete(long id)
+        {
+            Shipment shipment = GetShipment(id);
+            if (shipment != null)
+            {
+
+                context.Shipments.Remove(shipment);
+            }
         }
 
         public IQueryable<Shipment> GetAll()

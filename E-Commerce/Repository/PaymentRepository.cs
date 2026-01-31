@@ -7,7 +7,7 @@ namespace E_Commerce.Repository
         E_Context context;
         public PaymentRepository (E_Context _context)
         {
-            _context = context;
+            context = _context;
         }
         public void Add (Payment payment)
         {

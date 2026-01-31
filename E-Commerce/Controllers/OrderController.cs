@@ -30,6 +30,7 @@ namespace E_Commerce.Controllers
             var order = new Order
             {
                 UserId = userId,
+                OrderNumber = "ORD-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
                 ShippingAddressId = orderDto.ShippingAddressId,
                 BillingAddressId = orderDto.BillingAddressId,
                 PaymentMethod = orderDto.PaymentMethod,

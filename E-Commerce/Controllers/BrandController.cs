@@ -110,7 +110,7 @@ namespace E_Commerce.Controllers
         
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+       [Authorize(Roles = "Admin")]
         public IActionResult DeleteBrand(long id)
         {
             var brand = BrandRepository.GetById(id);

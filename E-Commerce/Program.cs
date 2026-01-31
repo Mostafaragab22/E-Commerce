@@ -2,12 +2,13 @@
 using E_Commerce.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
-using System.Text;
+using Microsoft.OpenApi.Models;
 using System.Runtime;
+using System.Text;
+using System.Threading.RateLimiting;
 
 namespace E_Commerce
 {
@@ -35,11 +36,15 @@ namespace E_Commerce
             builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
             builder.Services.AddScoped<IWishlistRepository, WishlistRepository>();
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+            builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
+
            
 
             builder.Services.AddIdentity<User ,Role>()
-            .AddEntityFrameworkStores<E_Context>();
-            
+            .AddEntityFrameworkStores<E_Context>()
+             .AddDefaultTokenProviders();
+
 
             builder.Services.AddAuthentication(options =>
             {
@@ -92,25 +97,64 @@ namespace E_Commerce
                         });
                     });
             });
-            
+            #region Swagger Setting
+            builder.Services.AddSwaggerGen(swagger =>
+            {
+                //This is to generate the Default UI of Swagger Documentation    
+                swagger.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "ASP.NET 9 Web API",
+                    Description = " E-Commerce Project"
+                });
+                // To Enable authorization using Swagger (JWT)    
+                swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\"",
+                });
+                swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                    new OpenApiSecurityScheme
+                    {
+                    Reference = new OpenApiReference
+                    {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                    }
+                    },
+                    new string[] {}
+                    }
+                    });
+            });
+            #endregion
+
+
             builder.Services.AddOpenApi();
             var app = builder.Build();
 
 
-           
-            if (app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsProduction())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
             app.UseRateLimiter();
-
-            app.UseAuthentication();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseAuthorization();
-
+            app.UseAuthorization();
+            
 
             app.MapControllers();
+            
+
 
             app.Run();
         }

@@ -8,7 +8,7 @@ namespace E_Commerce.Repository
         E_Context context;
         public AddressRepository(E_Context _context)
         {
-            _context = context;
+            context = _context;
         }
         public void Add(Address address)
         {
@@ -23,7 +23,7 @@ namespace E_Commerce.Repository
             Address address = GetById(id);
             if (address != null)
             {
-                context.Addresses.Attach(address);
+               
                 context.Addresses.Remove(address);
             }
         }

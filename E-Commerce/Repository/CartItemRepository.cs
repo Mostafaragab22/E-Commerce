@@ -8,7 +8,7 @@ namespace E_Commerce.Repository
         E_Context context;
         public CartItemRepository(E_Context _context)
         {
-            _context = context;
+            context = _context;
         }
         public CartItem GetById(long id)
         {

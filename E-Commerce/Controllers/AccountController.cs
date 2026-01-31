@@ -27,11 +27,11 @@ namespace E_Commerce.Controllers
         private readonly IConfiguration config;
 
        
-        public AccountController(IUserRepository userRepository,IConfiguration _config, UserManager<User> UserManager)
+        public AccountController(IUserRepository userRepository,IConfiguration _config, UserManager<User>_userManager)
         {
             UserRepository = userRepository;
             config = _config;
-            UserRepository = userRepository;
+            userManager = _userManager;
         }
         [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterDTO registerdto)
@@ -40,7 +40,8 @@ namespace E_Commerce.Controllers
             {
                 var account = new User
                 {
-                    FullName = registerdto.Email,
+                    FullName = registerdto.FullName,
+                    UserName = registerdto.Email,
                     PhoneNumber = registerdto.Phone,
                     Email = registerdto.Email,
                 };
@@ -84,7 +85,7 @@ namespace E_Commerce.Controllers
             {
                 userClaims.Add(new Claim(ClaimTypes.Role, RoleName));
             }
-            var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecuretyKey"]));
+            var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecretKey"]));
             SigningCredentials signingCred = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
             JwtSecurityToken MyToken = new JwtSecurityToken
                 (
