@@ -22,7 +22,7 @@ namespace E_Commerce.Controllers
         }
 
         [HttpGet("{id}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult GetShipment(long id)
         {
             
@@ -45,7 +45,7 @@ namespace E_Commerce.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult CreateShipment(CreateShipmentDto shipmentDto)
         {
             var order = OrderRepository.GetById(shipmentDto.OrderId);
@@ -79,7 +79,7 @@ namespace E_Commerce.Controllers
 
 
         [HttpPut("{id}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateShipment([FromBody] UpdateShipmentDto shipmentDto , long id)
         {
             var shipment = ShipmentRepository.GetShipment(id);
