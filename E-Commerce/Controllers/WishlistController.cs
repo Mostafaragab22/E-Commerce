@@ -70,13 +70,15 @@ namespace E_Commerce.Controllers
 
             var wishlistDto = new WishlistDto
             {
-                Items = wishlist.Items.Select(i => new WishlistItemDto
+                Items = wishlist.Items
+                .Where(i => i.Product != null) 
+                .Select(i => new WishlistItemDto
                 {
                     Id = i.Id,
                     ProductId = i.ProductId,
-                    ProductName = i.Product.Name,
-                    VariantId = i.ProductVariant.Id,
-                    VariantAttributes = i.ProductVariant.Attributes
+                    ProductName = i.Product?.Name ?? "N/A",
+                    VariantId = i.ProductVariant?.Id ?? 0,
+                    VariantAttributes = i.ProductVariant?.Attributes
                 }).ToList()
             };
 

@@ -69,7 +69,9 @@ public class PaymentController : ControllerBase
             UserId = userId,                
             OrderId = paymentDto.OrderId,    
             PaymentMethod = paymentDto.PaymentMethod,
-            Amount = paymentDto.Amount,      
+            Amount = paymentDto.Amount,
+            Currency = "EGP",
+            GatewayResponse = "Success",
             Status = PaymentStatus.Pending,  
             TransactionReference = Guid.NewGuid().ToString() 
         };

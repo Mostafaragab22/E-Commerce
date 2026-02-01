@@ -12,7 +12,9 @@ namespace E_Commerce.Repository
         }
         public CartItem GetById(long id)
         {
-            return context.CartItems.FirstOrDefault(e => e.Id == id);
+            return context.CartItems
+                 .Include(ci => ci.Cart)
+                .FirstOrDefault(e => e.Id == id);
 
         }
 

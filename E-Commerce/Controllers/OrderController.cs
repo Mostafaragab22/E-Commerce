@@ -68,6 +68,7 @@ namespace E_Commerce.Controllers
             }
 
             [HttpGet("{id}")]
+        
             public IActionResult GetMyOrder(long id)
             {
                 var userIdString = User.UserId();
@@ -85,7 +86,7 @@ namespace E_Commerce.Controllers
                     Id = order.Id,
                     OrderNumber = order.OrderNumber,
                     Status = order.Status,
-                    TotalAmount = order.TotalAmount,
+                    TotalAmount = order.TotalAmount ?? 0,
                     PaymentStatus = order.PaymentStatus,
 
                     Items = order.OrderItems.Select(o => new OrderItemDto
@@ -121,7 +122,7 @@ namespace E_Commerce.Controllers
                     Id = orderDetial.Id,
                     OrderNumber = orderDetial.OrderNumber,
                     Status = orderDetial.Status,
-                    TotalAmount = orderDetial.TotalAmount.Value,
+                    TotalAmount = orderDetial.TotalAmount ?? 0,
                     PaymentStatus = orderDetial.PaymentStatus,
                     Items = orderDetial.OrderItems.Select(i => new OrderItemDto
                     {
@@ -136,36 +137,41 @@ namespace E_Commerce.Controllers
                 };
                 return Ok(OrderDetials);
             }
-            [HttpPut("CancelOrder/{id}")]
-            public IActionResult CancelOrder(UpdateOrderStatusDto orderCancel, long id)
+        [HttpPut("CancelOrder/{id}")]
+        [Authorize]
+        public IActionResult CancelOrder(long id) 
+        {
+            var userIdString = User.UserId();
+            if (!long.TryParse(userIdString, out var userId))
+                return Unauthorized(); 
+
+            var order = OrderRepository.GetById(id);
+            if (order == null)
+                return NotFound("Order not found");
+
+            if (order.UserId != userId)
+                return Forbid();
+
+            
+            if (order.Status == OrderStatus.Shipped ||
+                order.Status == OrderStatus.Delivered ||
+                order.Status == OrderStatus.Cancelled)
             {
-                var userIdString = User.UserId();
-                if (!long.TryParse(userIdString, out var userId))
-                    return BadRequest();
-                var order = OrderRepository.GetById(id);
-                if (order == null)
-                    return NotFound();
-                if (order.UserId != userId)
-                    return Forbid();
+                return BadRequest("Order cannot be cancelled in its current state");
+            }
 
-                if (order.Status == OrderStatus.Shipped ||
-                    order.Status == OrderStatus.Delivered ||
-                    order.Status == OrderStatus.Cancelled)
-                {
-                    return BadRequest("Order cannot be cancelled");
-                }
+            order.Status = OrderStatus.Cancelled;
 
-                order.Status = OrderStatus.Cancelled;
-             foreach (var item in order.OrderItems)
-             {
-
-                var invetoryItem = InventoryRepository.GetByItem(item.ProductId,"Product");
+            
+            foreach (var item in order.OrderItems)
+            {
+                var invetoryItem = InventoryRepository.GetByItem(item.ProductId, "Product");
                 if (invetoryItem != null)
                 {
                     invetoryItem.Quantity += item.Quantity;
                     InventoryRepository.Update(invetoryItem);
-
                 }
+
                 var movement = new InventoryMovement
                 {
                     ItemType = "Product",
@@ -176,30 +182,33 @@ namespace E_Commerce.Controllers
                     ReferenceId = order.Id
                 };
                 InventoryRepository.Add(movement);
-
-
             }
-                
-                OrderRepository.Update(order);
-                OrderRepository.save();
-                return Ok();
-            }
-            [HttpGet]
-            [Authorize(Roles = "Admin")]
-            public async Task<ActionResult<List<OrderListDto>>> GetAllOrders()
-            {
-                var Orders = OrderRepository.GetAllOrder()
-                    .Select(d => new OrderListDto
-                    {
-                        Id = d.Id,
-                        OrderNumber = d.OrderNumber,
-                        Status = d.Status,
-                        TotalAmount = d.TotalAmount ?? 0
+
+            OrderRepository.Update(order);
+            OrderRepository.save();
+            InventoryRepository.save(); 
+
+            return Ok("Order cancelled and inventory updated");
+        }
+
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<List<OrderListDto>>> GetAllOrders()
+        {
+            var Orders = OrderRepository.GetAllOrder()
+
+               .Select(d => new OrderListDto
+               {
+                   Id = d.Id,
+                   OrderNumber = d.OrderNumber,
+                   Status = d.Status,
+                   TotalAmount = d.TotalAmount ?? 0
 
 
 
 
-                    }).ToList();
+               }).ToList();
                 return Ok(Orders);
 
             }

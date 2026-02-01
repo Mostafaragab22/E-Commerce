@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Runtime;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 namespace E_Commerce
@@ -18,7 +19,11 @@ namespace E_Commerce
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                 .AddJsonOptions(options =>
+                 {
+                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                 });
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<E_Context>(optionsAction: options =>
             {

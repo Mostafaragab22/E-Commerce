@@ -91,7 +91,7 @@ namespace E_Commerce.Controllers
       
         [HttpPut("{id}")]
         [Authorize]
-        public IActionResult UpdateCart(long id, UpdateCartItemDto dto)
+        public IActionResult UpdateCart(long id, [FromBody]UpdateCartItemDto dto)
         {
             var userIdString = User.UserId();
             if (!long.TryParse(userIdString, out var userId))

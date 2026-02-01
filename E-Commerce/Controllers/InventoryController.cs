@@ -13,13 +13,13 @@ namespace E_Commerce.Controllers
     [ApiController]
     public class InventoryController : ControllerBase
     {
-        InventoryRepository InventoryRepository { get; set; }
+        IInventoryRepository InventoryRepository { get; set; }
 
-        public InventoryController(InventoryRepository inventoryRepository)
+        public InventoryController(IInventoryRepository inventoryRepository)
         {
             InventoryRepository = inventoryRepository;
         }
-        //[Authorize (Roles = "Admin")]
+        [Authorize (Roles = "Admin")]
         [HttpGet]
         public IActionResult GetInventory()
         {
@@ -39,7 +39,7 @@ namespace E_Commerce.Controllers
 
 
         [HttpPost("Adjust")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult AdjustInventory(AdjustInventoryDto dto)
         {
             var inventoryItem = InventoryRepository.GetByItem(dto.ItemId, dto.ItemType);
@@ -68,7 +68,7 @@ namespace E_Commerce.Controllers
         }
 
         [HttpGet("Movements/{itemId}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult GetInventoryMovements(long itemId, string itemType)
         {
             var movements = InventoryRepository.GetMovements(itemType,itemId)
